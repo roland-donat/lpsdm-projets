@@ -254,18 +254,18 @@ for the JavaScript code in this tag.
 <h2>Table des matières</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc109361">1. Contexte</a></li>
-<li><a href="#org88d4bd1">2. Problématique</a></li>
-<li><a href="#org291ea27">3. Données</a></li>
-<li><a href="#org735ab87">4. Livrables techniques attendus</a></li>
+<li><a href="#orged4f5a8">1. Contexte</a></li>
+<li><a href="#orgfcb9265">2. Problématique</a></li>
+<li><a href="#orge7b02db">3. Données</a></li>
+<li><a href="#org4ea07aa">4. Livrables techniques attendus</a></li>
 </ul>
 </div>
 </div>
 
 
 
-<div id="outline-container-orgc109361" class="outline-2">
-<h2 id="orgc109361"><span class="section-number-2">1</span> Contexte</h2>
+<div id="outline-container-orged4f5a8" class="outline-2">
+<h2 id="orged4f5a8"><span class="section-number-2">1</span> Contexte</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Depuis septembre 2015, la ville de Séné collabore avec les villes de La Trinité-Surzur et Theix-Noyalo, dans le
@@ -285,64 +285,68 @@ Les quatre écoles primaires bénéficiant de la restauration scolaire de la vil
 
 <p>
 La ville de Séné est engagée depuis plusieurs années dans une démarche d'amélioration de la
-restauration scolaire que ce soit sur le plan qualitatif, environnemental ou financier. 
-Ce projet s'inscrit en particulier dans le plan d'actions de la commune visant à réduire le
-gaspillage alimentaire.  
+restauration scolaire que ce soit sur les aspects qualitatifs, environnementaux ou financiers. 
+Ce projet s'inscrit en particulier dans le plan d'actions de la commune visant à promouvoir une
+alimentation plus saine (augmentation de la part de matières premières d'origine biologique) et
+vertueuse pour l'environnement (volonté de mettre en place des circuits d'apporvisionnements locaux
+et courts).
 </p>
 </div>
 </div>
 
-<div id="outline-container-org88d4bd1" class="outline-2">
-<h2 id="org88d4bd1"><span class="section-number-2">2</span> Problématique</h2>
+<div id="outline-container-orgfcb9265" class="outline-2">
+<h2 id="orgfcb9265"><span class="section-number-2">2</span> Problématique</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-Les commandes des repas scolaires sont effectuées aujourd'hui deux jours ouvrés en avance (J-2),
-i.e. la commande pour le jeudi doit être effectuée le lundi précédent (il n'y a pas d'école le
-mercredi). 
+L'objectif du projet consiste à mettre au point un outil permettant de calculer le bilan carbone
+d'un repas produit par la restauration scolaire. 
 </p>
 
 <p>
-Chaque jour, les écoles de la commune font leur commande de repas de manière autonome en fonction du
-nombre d'enfants inscrits à la cantine à J+2. Toutefois, le nombre d'inscrits n'est pas une
-information totalement fiable car des familles décident au dernier moment de retirer ou laisser
-leurs enfants à la cantine. Pour palier ces situations, les écoles prévoient une marge en commandant
-souvent plus de repas que nécessaires entrainant mécaniquement un risque de gaspillage alimentaire. 
+Le calcul des émissions de gaz à effet de serre (GES) d'un repas peut-être réalisé de plusieurs
+manières et dépend du périmètre considéré pour l'estimation.
 </p>
 
 <p>
-L'objectif du projet consiste à développer un outil d'aide à la décision permettant d'optimiser les
-commandes journalières de repas de chacune des écoles de la commune. 
+Parmi vos premières actions, il conviendra donc de monter en compétences sur les méthodologies de
+calcul du bilan GES et d'orienter votre travail de manière pragmatique eu égard des données à
+disposition. 
 </p>
 
 <p>
-D'un point de vue statistique, il s'agira de déterminer un certain nombres de facteurs expliquant la
-fréquentation de la restauration scolaire (jour de la semaine, période de l'année, jours spéciaux,
-menu, etc.).
+Voici quelques références afin de débuter vos recherches bibliographiques :
 </p>
+<ul class="org-ul">
+<li><a href="https://www.bilans-ges.ademe.fr/documentation/UPLOAD_DOC_FR/index.htm?repas.hmt">Base Carbone de l'ADEME</a>.</li>
+<li><a href="https://moodle.insa-rouen.fr/pluginfile.php/29733/mod_folder/content/0/Rapport_P6-3_2012_08.pdf?forcedownload=1">Rapport technique d'étudiants de l'INSA de Rouen sur le calcul d'un bilan GES pour l'alimentation</a>.</li>
+<li><a href="https://www.ecoco2.com/blog/lempreinte-carbone-des-plats-affichee-dans-des-restaurants-universitaires/">Article au sujet d'un éco-score pour les restaurants universitaires à Grenoble</a>.</li>
+<li><a href="https://www.neorestauration.com/article/un-bilan-carbone-pour-reduire-l-empreinte-de-son-restaurant,25072">Article sur le bilan carbone dans la restauration</a>.</li>
+<li><a href="https://etiquettable.eco2initiative.com/wp-content/uploads/2020/09/guide_climat_cantines_02_pages.pdf">Rapport méthodologique pour une cantine bas carbone</a>.</li>
+</ul>
 </div>
 </div>
 
-<div id="outline-container-org291ea27" class="outline-2">
-<h2 id="org291ea27"><span class="section-number-2">3</span> Données</h2>
+<div id="outline-container-orge7b02db" class="outline-2">
+<h2 id="orge7b02db"><span class="section-number-2">3</span> Données</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Les données disponibles sont :
 </p>
 <ul class="org-ul">
-<li>l'historique journalière de la fréquentation et de la commande de repas pour chacune des écoles
-primaires de la ville de Séné.</li>
-<li>l'historique journlier des menus proposés par la restauration scolaire.</li>
+<li>l'historique journalier des menus proposés par la restauration scolaire ;</li>
+<li>la liste des recettes proposées par la cantine scolaire ;</li>
+<li>la liste des ingrédients composant les recettes.</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org735ab87" class="outline-2">
-<h2 id="org735ab87"><span class="section-number-2">4</span> Livrables techniques attendus</h2>
+<div id="outline-container-org4ea07aa" class="outline-2">
+<h2 id="org4ea07aa"><span class="section-number-2">4</span> Livrables techniques attendus</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 En plus des livrables académiques demandés (notes techniques, rapport, soutenances), vous réaliserez
-un petit applicatif permettant de visualiser l'historique des données sur la restauration scolaire
-et les prévisions de votre modèle statistique.
+un petit applicatif permettant de suivre le bilan carbone journalier de la restauration scolaire
+sinagote. 
 </p>
 
 <p>
