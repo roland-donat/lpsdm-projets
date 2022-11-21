@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Développement d'un outil de recommandations de maintenance</title>
+<meta name="author" content="Roland Donat" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Développement d'un outil de recommandations de maintenance</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org4cfced2">1. Contexte et objectifs du projet</a></li>
+<li><a href="#org0eaf58e">2. Problématique métier</a></li>
+<li><a href="#org95bb323">3. Présentation des données</a>
+<ul>
+<li><a href="#org83ca70b">3.1. Données <code>OT-ODR</code></a></li>
+<li><a href="#orgbd8be16">3.2. Données <code>EQUIPEMENTS</code></a></li>
+</ul>
+</li>
+<li><a href="#org8928a0d">4. Chargement des données</a></li>
+<li><a href="#sec-sujets">5. Travaux à réaliser</a>
+<ul>
+<li><a href="#orgf8178e0">5.1. Analyses descriptives et visualisation</a></li>
+<li><a href="#org1983647">5.2. Développement d'un algorithme de diagnostic et de recommandation</a></li>
+<li><a href="#orgba3d7c4">5.3. (Bonus) Développement d'un applicatif métier</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4cfced2" class="outline-2">
+<h2 id="org4cfced2"><span class="section-number-2">1.</span> Contexte et objectifs du projet</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Une entreprise de transport collectif cherche à améliorer l'efficacité des opérations de
+maintenance réalisées sur ses véhicules. Un axe d'amélioration porte sur l'élaboration de
+recommandations visant à assister les mainteneurs dans leurs opérations de maintenance. 
+</p>
+
+<p>
+L'entreprise souhaite également mutualiser l'expertise des mainteneurs. En effet, les
+mainteneurs, qui sont situés sur différents lieux géographiques, interviennent sur des matériels
+analogues sans pouvoir aisément bénéficier de l'expérience de leurs collègues travaillant sur
+d'autres sites.
+</p>
+
+<p>
+Ce projet vise à apporter des outils d'aide à la décision pour le pilotage de la maintenance et la
+réalisation des actions de réparation. La section <a href="#sec-sujets">5</a> présente différents travaux à réaliser
+pour contribuer à cet objectif. Pour ce faire, des données issues de la GMAO (Gestionnaire de
+Maintenance Assisté par Ordinateur) de l'entreprise sont mises à disposition.
+</p>
+
+<p>
+*Note importante : les données mises à disposition sont anonymisées mais demeurent néanmoins
+confidentielles. Il est donc interdit de diffuser et partager ces données en dehors du cadre du
+projet.* 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0eaf58e" class="outline-2">
+<h2 id="org0eaf58e"><span class="section-number-2">2.</span> Problématique métier</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+L'entreprise de transport exploite une flotte de véhicules qui circule pendant les horaires de
+service. Lorsqu'un problème survient sur un véhicule, le conducteur est chargé de faire un
+signalement décrivant le problème perçu. Le conducteur réalise son signalement <i>via</i> une console
+électronique dans le véhicule lui permettant de saisir trois informations :
+</p>
+<ol class="org-ol">
+<li>l'organe siège de l'anomalie ;</li>
+<li>le symptôme observé ;</li>
+<li>une liste d'informations contextuelles sur le lieu ou le phénomène observé.</li>
+</ol>
+
+<p>
+Il est important d'avoir à l'esprit que ce signalement est une appréciation du conducteur et que ce
+dernier peut bien sûr se tromper sur les informations saisies.
+</p>
+
+<p>
+En fin de service, le véhicule retourne au dépôt. Les signalements effectués sont transmis dans
+l'outil de gestion de la maintenance (GMAO). Chaque signalement donne lieu à un ordre de travail
+(OT). Chaque véhicule ayant un OT reste à l'atelier de maintenance jusqu'à ce qu'un mainteneur
+résolve le problème et clôture l'OT. Pour ce faire, le mainteneur en charge de l'OT réalisera une ou
+plusieurs actions de maintenance, appelées ordres de réparation (ODR). 
+</p>
+
+<p>
+L'objectif de ce projet est d'aider les mainteneurs en leur recommandant la ou les actions de maintenance
+ les plus appropriées compte tenu des informations provenant du signalement conducteur et des caractéristiques
+du véhicule (kilométrage, type de moteur, marque, etc.).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org95bb323" class="outline-2">
+<h2 id="org95bb323"><span class="section-number-2">3.</span> Présentation des données</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Deux sources de données sont mises à disposition dans ce projet :
+</p>
+<ol class="org-ol">
+<li>Les données <code>OT-ODR</code> contenant les OT et ODR associés de la flotte de véhicules entre 2011
+et 2019.</li>
+<li>Les données <code>EQUIPEMENTS</code> contenant les caractéristiques des véhicules.</li>
+</ol>
+</div>
+
+<div id="outline-container-org83ca70b" class="outline-3">
+<h3 id="org83ca70b"><span class="section-number-3">3.1.</span> Données <code>OT-ODR</code></h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Le Tableau <a href="#orgaa38ccb">1</a> donne une description des variables du jeu de données <code>OT-ODR</code>.
+</p>
+
+<table id="orgaa38ccb" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption class="t-above"><span class="table-number">Tableau 1 :</span> Définition des variables du jeu de données <code>OT-ODR</code>.</caption>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Colonne</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">OT_ID</td>
+<td class="org-left">ID de l'ordre de travail</td>
+</tr>
+
+<tr>
+<td class="org-left">ODR_ID</td>
+<td class="org-left">ID de l'ordre de réparation</td>
+</tr>
+
+<tr>
+<td class="org-left">ODR_LIBELLE</td>
+<td class="org-left">Libellé de l'ordre de réparation (action de maintenance)</td>
+</tr>
+
+<tr>
+<td class="org-left">TYPE_TRAVAIL</td>
+<td class="org-left">Type d'action réalisée associé à l'ODR</td>
+</tr>
+
+<tr>
+<td class="org-left">DUREE_TRAVAIL</td>
+<td class="org-left">Durée de l'action de maintenance associé à l'ODR</td>
+</tr>
+
+<tr>
+<td class="org-left">SYSTEM_N1</td>
+<td class="org-left">Identifiant de système de niveau 1 concerné par l'ODR (niveau macroscopique)</td>
+</tr>
+
+<tr>
+<td class="org-left">SYSTEM_N2</td>
+<td class="org-left">Identifiant de système de niveau 2 concerné par l'ODR</td>
+</tr>
+
+<tr>
+<td class="org-left">SYSTEM_N3</td>
+<td class="org-left">Identifiant de système de niveau 3 concerné par l'ODR (niveau le plus précis)</td>
+</tr>
+
+<tr>
+<td class="org-left">EQU_ID</td>
+<td class="org-left">Identifiant du véhicule concerné par l'OT</td>
+</tr>
+
+<tr>
+<td class="org-left">DATE_OT</td>
+<td class="org-left">Date de création de l'OT</td>
+</tr>
+
+<tr>
+<td class="org-left">KILOMETRAGE</td>
+<td class="org-left">Nombre de kilométres parcourus par le véhicule au moment de la création de l'OT</td>
+</tr>
+
+<tr>
+<td class="org-left">SIG_ORGANE</td>
+<td class="org-left">Signalement du conduction sur la partie organe</td>
+</tr>
+
+<tr>
+<td class="org-left">SIG_CONTEXTE</td>
+<td class="org-left">Signalement du conduction sur le contexte de l'anomalie</td>
+</tr>
+
+<tr>
+<td class="org-left">SIG_OBS</td>
+<td class="org-left">Signalement du conduction sur le symptôme observé</td>
+</tr>
+
+<tr>
+<td class="org-left">LIGNE</td>
+<td class="org-left">Identifiant de la ligne du véhicule au moment du signalement conducteur</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgbd8be16" class="outline-3">
+<h3 id="orgbd8be16"><span class="section-number-3">3.2.</span> Données <code>EQUIPEMENTS</code></h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Le Tableau <a href="#org6fea55a">2</a> donne une description des variables du jeu de données <code>EQUIPEMENTS</code>.
+</p>
+
+<table id="org6fea55a" border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption class="t-above"><span class="table-number">Tableau 2 :</span> Définition des variables du jeu de données <code>EQUIPEMENTS</code>.</caption>
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Colonne</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">EQU_ID</td>
+<td class="org-left">Identifiant du véhicule</td>
+</tr>
+
+<tr>
+<td class="org-left">MODELE</td>
+<td class="org-left">Modèle du véhicule</td>
+</tr>
+
+<tr>
+<td class="org-left">CONSTRUCTEUR</td>
+<td class="org-left">Constructeur du véhicule</td>
+</tr>
+
+<tr>
+<td class="org-left">MOTEUR</td>
+<td class="org-left">Type de motorisation du véhicule</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org8928a0d" class="outline-2">
+<h2 id="org8928a0d"><span class="section-number-2">4.</span> Chargement des données</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Les données se trouvent dans le répertoire `data_projet` et sont à télécharger en local.
+</p>
+
+<p>
+Pour lire les données avec <code>Python</code>: 
+</p>
+<ol class="org-ol">
+<li>Installer la librairie <code>Pandas</code> (i.e. <code>pip install pandas</code> si vous êtes sous <code>Linux</code>).</li>
+<li>Exécuter les commandes suivantes en prenant garde à modifier le chemin des fichiers dans les</li>
+</ol>
+<p>
+variables <code>ot_odr_filename</code> et <code>equipements_filename</code> si besoin :
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> pandas <span style="color: #F0DFAF; font-weight: bold;">as</span> pd
+<span style="color: #F0DFAF; font-weight: bold;">import</span> os
+<span style="color: #F0DFAF; font-weight: bold;">import</span> tabulate
+
+<span style="color: #DFAF8F;">ot_odr_filename</span> = os.path.join(<span style="color: #CC9393;">"data_projet"</span>, <span style="color: #CC9393;">"OT_ODR.csv.bz2"</span>)
+<span style="color: #DFAF8F;">ot_odr_df</span> = pd.read_csv(ot_odr_filename,
+<span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   compression=<span style="color: #CC9393;">"bz2"</span>,
+<span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   sep=<span style="color: #CC9393;">";"</span>)
+
+<span style="color: #DFAF8F;">equipements_filename</span> = os.path.join(<span style="color: #CC9393;">"data_projet"</span>, <span style="color: #CC9393;">'EQUIPEMENTS.csv'</span>)
+<span style="color: #DFAF8F;">equipements_df</span> = pd.read_csv(equipements_filename,
+<span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>   <span style="color: #DCDCCC; background-color: #4F4F4F;"> </span>sep=<span style="color: #CC9393;">";"</span>)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-sujets" class="outline-2">
+<h2 id="sec-sujets"><span class="section-number-2">5.</span> Travaux à réaliser</h2>
+<div class="outline-text-2" id="text-sec-sujets">
+</div>
+
+<div id="outline-container-orgf8178e0" class="outline-3">
+<h3 id="orgf8178e0"><span class="section-number-3">5.1.</span> Analyses descriptives et visualisation</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+Il s'agit ici de réaliser des statistiques descriptives sur l'activité de maintenance de
+l'entreprise.
+</p>
+
+<p>
+Le travail consiste par exemple à construire et visualiser certains indicateurs, par exemple :
+</p>
+<ul class="org-ul">
+<li>historique des OT pour un véhicule donnée ;</li>
+<li>temps de maintenance moyen pour chaque type de pannes et type de véhicules ;</li>
+<li>répartition des actions de maintenance réalisées en fonction des caractéristiques des véhicules ;</li>
+<li>temps et nombre de kilomètres moyen entre chaque les pannes d'un niveau système donné ;</li>
+<li>etc.</li>
+</ul>
+
+<p>
+Les indicateurs produits sont à visualiser sous la forme d'un tableau de bord interactif développé
+de préférence en <code>Python</code> avec les librairies <code>Plotly Dash</code> ou <code>Streamlit</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1983647" class="outline-3">
+<h3 id="org1983647"><span class="section-number-3">5.2.</span> Développement d'un algorithme de diagnostic et de recommandation</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Ce travail correspond au développement d'un moteur d'aide au diagnostic et à la recommandation de
+maintenance. Il s'agit donc en 
+pratique d'élaborer un modèle permettant de relier les informations d'un signalement et les
+caractéristiques d'un véhicule en maintenance à l'ordre de réparation (ODR) permettant de remettre
+le véhicule en service. 
+</p>
+
+<p>
+Les principaux travaux demandés sont les suivants :
+</p>
+<ol class="org-ol">
+<li>Proposer une approche de modélisation pertinente pour répondre à la
+problématique en argumentant vos choix.</li>
+<li>Utiliser les données à disposition pour calibrer le modèle retenu.</li>
+<li>Mettre en oeuvre des tests de performances afin d'évaluer la qualité des diagnostics et recommandations
+produites par le modèle développé.</li>
+<li>Mettre en production l'algorithme d'aide à la décision sous la forme d'une API qui pourra être
+interrogée par d'autres applications (cf. section suivante).</li>
+</ol>
+
+<p>
+Nous recommandons d'utiliser le formalisme des Réseaux Bayésiens pour réaliser le modèle de
+diagnostic. Vous pourrez notamment utiliser la <a href="https://agrum.gitlab.io/pages/pyagrum.html">librairie <code>PyAgrum</code></a> pour mettre au point et exploiter
+vos modèles.
+</p>
+
+<p>
+En ce qui concerne l'API, il est recommandé d'utiliser <a href="https://fastapi.tiangolo.com/tutorial/"><code>FastAPI</code></a> ou <a href="https://pythonbasics.org/flask-rest-api/"><code>Flask</code></a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgba3d7c4" class="outline-3">
+<h3 id="orgba3d7c4"><span class="section-number-3">5.3.</span> (Bonus) Développement d'un applicatif métier</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+L'objectif de ce travail est de développer une application métier permettant d'interagir avec le
+   moteur de recommandations de la section précédente de manière transparente pour 
+   l'utilisateur final. L'application devra donc proposer une interface permettant de saisir les
+   informations d'un signalement ainsi que les caractéristiques d'un véhicule et mettre en forme les
+   recommandations produites par votre algorithme d'aide à la décision.
+</p>
+
+<p>
+L'application est à développer avec l'une des technologies suivantes :
+</p>
+<ul class="org-ul">
+<li><code>Plotly Dash</code> (<code>Python</code>, choix recommandé) ;</li>
+<li><code>Bokeh</code> (<code>Python</code>) ;</li>
+<li><code>RShiny</code> (<code>R</code>) ;</li>
+<li><code>Streamlit</code> (<code>Python</code>).</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
